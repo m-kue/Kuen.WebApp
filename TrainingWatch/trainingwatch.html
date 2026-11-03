@@ -23,7 +23,7 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 4vh;
+    gap: 3vh;
     font-family: 'Segoe UI', Arial, sans-serif;
     background: #1a1a2e;
     transition: background 1s ease;
@@ -34,28 +34,29 @@
   }
 
   #anzeige {
-    font-size: min(38vw, 45vh);
+    font-size: min(38vw, 55vh);
     font-weight: 700;
     font-variant-numeric: tabular-nums;
     color: #ffffff;
     letter-spacing: -0.02em;
     user-select: none;
     line-height: 1;
+    white-space: nowrap;
     text-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
   }
 
   #steuerung {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 8px;
     flex-wrap: wrap;
     justify-content: center;
   }
 
   #vollbildKnopf {
-    font-size: 1.2rem;
+    font-size: 0.95rem;
     font-weight: 600;
-    padding: 12px 28px;
+    padding: 8px 20px;
     border: 2px solid rgba(255, 255, 255, 0.5);
     border-radius: 999px;
     background: transparent;
@@ -68,9 +69,9 @@
   }
 
   #startKnopf {
-    font-size: 1.2rem;
+    font-size: 0.95rem;
     font-weight: 600;
-    padding: 12px 36px;
+    padding: 8px 26px;
     border: none;
     border-radius: 999px;
     background: #16a085;
@@ -83,9 +84,9 @@
   }
 
   #resetKnopf {
-    font-size: 1.2rem;
+    font-size: 0.95rem;
     font-weight: 600;
-    padding: 12px 28px;
+    padding: 8px 20px;
     border: 2px solid rgba(255, 255, 255, 0.5);
     border-radius: 999px;
     background: transparent;
@@ -100,15 +101,15 @@
   .grenze {
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: 4px;
     color: #ffffff;
-    font-size: 1rem;
+    font-size: 0.85rem;
   }
 
   .grenze input {
-    width: 4.5em;
-    font-size: 1rem;
-    padding: 8px;
+    width: 3.2em;
+    font-size: 0.85rem;
+    padding: 5px;
     border: none;
     border-radius: 8px;
     text-align: center;
@@ -137,6 +138,7 @@
 
 <script>
   const anzeige = document.getElementById('anzeige');
+  const steuerung = document.getElementById('steuerung');
   const knopf = document.getElementById('startKnopf');
   const resetKnopf = document.getElementById('resetKnopf');
   const vollbildKnopf = document.getElementById('vollbildKnopf');
@@ -157,10 +159,26 @@
     return min * 60 + sek;
   }
 
+  function passeGroesseAn() {
+    anzeige.style.fontSize = '100px';
+    const rect = anzeige.getBoundingClientRect();
+    const luecke = parseFloat(getComputedStyle(document.body).gap) || 0;
+    const verfuegbarHoehe = window.innerHeight - steuerung.offsetHeight - luecke;
+    const faktor = Math.min(window.innerWidth / rect.width, verfuegbarHoehe / rect.height);
+    anzeige.style.fontSize = Math.floor(100 * faktor) + 'px';
+  }
+
   function zeige(sekunden) {
-    anzeige.textContent = pad(Math.floor(sekunden / 60)) + ':' + pad(sekunden % 60);
+    const text = pad(Math.floor(sekunden / 60)) + ':' + pad(sekunden % 60);
+    if (text !== anzeige.textContent) {
+      anzeige.textContent = text;
+      passeGroesseAn();
+    }
     document.body.classList.toggle('abgelaufen', sekunden >= grenzeSekunden());
   }
+
+  window.addEventListener('resize', passeGroesseAn);
+  passeGroesseAn();
 
   function aktualisieren() {
     if (!laufend) return;
