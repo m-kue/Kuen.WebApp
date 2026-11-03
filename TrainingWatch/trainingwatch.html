@@ -45,14 +45,6 @@
     text-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
   }
 
-  body.versteckt #anzeige {
-    cursor: pointer;
-  }
-
-  body.versteckt #steuerung {
-    display: none;
-  }
-
   #steuerung {
     display: flex;
     align-items: center;
@@ -106,21 +98,6 @@
     background: rgba(255, 255, 255, 0.15);
   }
 
-  #ausblendKnopf {
-    font-size: 0.95rem;
-    font-weight: 600;
-    padding: 8px 14px;
-    border: 2px solid rgba(255, 255, 255, 0.5);
-    border-radius: 999px;
-    background: transparent;
-    color: #ffffff;
-    cursor: pointer;
-  }
-
-  #ausblendKnopf:hover {
-    background: rgba(255, 255, 255, 0.15);
-  }
-
   .grenze {
     display: flex;
     align-items: center;
@@ -146,7 +123,7 @@
 </style>
 </head>
 <body>
-  <div id="anzeige" title="Tippen, um die Steuerung einzublenden">00:00</div>
+  <div id="anzeige">00:00</div>
 
   <div id="steuerung">
     <button id="startKnopf">Start</button>
@@ -157,7 +134,6 @@
       <input id="grenzeMin" type="number" min="0" max="999" value="3"> Min
       <input id="grenzeSek" type="number" min="0" max="59" value="0"> Sek
     </label>
-    <button id="ausblendKnopf" title="Steuerung ausblenden">✕</button>
   </div>
 
 <script>
@@ -166,7 +142,6 @@
   const knopf = document.getElementById('startKnopf');
   const resetKnopf = document.getElementById('resetKnopf');
   const vollbildKnopf = document.getElementById('vollbildKnopf');
-  const ausblendKnopf = document.getElementById('ausblendKnopf');
   const grenzeMin = document.getElementById('grenzeMin');
   const grenzeSek = document.getElementById('grenzeSek');
 
@@ -187,11 +162,8 @@
   function passeGroesseAn() {
     anzeige.style.fontSize = '100px';
     const rect = anzeige.getBoundingClientRect();
-    let verfuegbarHoehe = window.innerHeight;
-    if (!document.body.classList.contains('versteckt')) {
-      const luecke = parseFloat(getComputedStyle(document.body).gap) || 0;
-      verfuegbarHoehe -= steuerung.offsetHeight + luecke;
-    }
+    const luecke = parseFloat(getComputedStyle(document.body).gap) || 0;
+    const verfuegbarHoehe = window.innerHeight - steuerung.offsetHeight - luecke;
     const faktor = Math.min(window.innerWidth / rect.width, verfuegbarHoehe / rect.height);
     anzeige.style.fontSize = Math.floor(100 * faktor) + 'px';
   }
@@ -232,16 +204,6 @@
     basisSekunden = 0;
     knopf.textContent = 'Start';
     zeige(0);
-  });
-
-  ausblendKnopf.addEventListener('click', () => {
-    document.body.classList.add('versteckt');
-    passeGroesseAn();
-  });
-
-  anzeige.addEventListener('click', () => {
-    document.body.classList.remove('versteckt');
-    passeGroesseAn();
   });
 
   function grenzeGeaendert() {
