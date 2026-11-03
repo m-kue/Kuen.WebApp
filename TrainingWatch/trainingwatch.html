@@ -207,6 +207,32 @@
     vollbildKnopf.textContent = document.fullscreenElement ? 'Vollbild beenden' : 'Vollbild';
   });
 
+  let wakeLock = null;
+
+  async function bildschirmWachHalten() {
+    if (!('wakeLock' in navigator) || document.visibilityState !== 'visible' || wakeLock) {
+      return;
+    }
+    try {
+      wakeLock = await navigator.wakeLock.request('screen');
+      wakeLock.addEventListener('release', () => {
+        wakeLock = null;
+      });
+    } catch (err) {
+      wakeLock = null;
+    }
+  }
+
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') {
+      bildschirmWachHalten();
+    }
+  });
+
+  document.addEventListener('pointerdown', bildschirmWachHalten);
+
+  bildschirmWachHalten();
+
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('sw.js');
   }
