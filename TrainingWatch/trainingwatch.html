@@ -82,6 +82,21 @@
     background: #1abc9c;
   }
 
+  #resetKnopf {
+    font-size: 1.2rem;
+    font-weight: 600;
+    padding: 12px 28px;
+    border: 2px solid rgba(255, 255, 255, 0.5);
+    border-radius: 999px;
+    background: transparent;
+    color: #ffffff;
+    cursor: pointer;
+  }
+
+  #resetKnopf:hover {
+    background: rgba(255, 255, 255, 0.15);
+  }
+
   .grenze {
     display: flex;
     align-items: center;
@@ -111,6 +126,7 @@
 
   <div id="steuerung">
     <button id="startKnopf">Start</button>
+    <button id="resetKnopf">Reset</button>
     <button id="vollbildKnopf">Vollbild</button>
     <label class="grenze">
       Farbwechsel ab
@@ -122,6 +138,7 @@
 <script>
   const anzeige = document.getElementById('anzeige');
   const knopf = document.getElementById('startKnopf');
+  const resetKnopf = document.getElementById('resetKnopf');
   const vollbildKnopf = document.getElementById('vollbildKnopf');
   const grenzeMin = document.getElementById('grenzeMin');
   const grenzeSek = document.getElementById('grenzeSek');
@@ -162,6 +179,13 @@
       knopf.textContent = 'Pause';
       aktualisieren();
     }
+  });
+
+  resetKnopf.addEventListener('click', () => {
+    laufend = false;
+    basisSekunden = 0;
+    knopf.textContent = 'Start';
+    zeige(0);
   });
 
   function grenzeGeaendert() {
