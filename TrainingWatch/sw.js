@@ -1,7 +1,6 @@
-const CACHE = 'stoppuhr-v1';
+const CACHE = 'trainingwatch-v1';
 const DATEIEN = [
-  './',
-  './stoppuhr.html',
+  './trainingwatch.html',
   './manifest.webmanifest',
   './icon-192.png',
   './icon-512.png'

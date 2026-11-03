@@ -1,8 +1,8 @@
 {
-  "name": "Stoppuhr",
-  "short_name": "Stoppuhr",
-  "description": "Große Stoppuhr mit einstellbarem Farbwechsel und Vollbildmodus.",
-  "start_url": ".",
+  "name": "TrainingWatch",
+  "short_name": "TrainingWatch",
+  "description": "Große TrainingWatch mit einstellbarem Farbwechsel und Vollbildmodus.",
+  "start_url": "./trainingwatch.html",
   "scope": ".",
   "display": "standalone",
   "orientation": "any",
