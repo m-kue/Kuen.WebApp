@@ -41,11 +41,11 @@
     letter-spacing: -0.02em;
     user-select: none;
     line-height: 1;
+    white-space: nowrap;
     text-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
   }
 
   body.versteckt #anzeige {
-    font-size: min(38vw, 72vh);
     cursor: pointer;
   }
 
@@ -162,6 +162,7 @@
 
 <script>
   const anzeige = document.getElementById('anzeige');
+  const steuerung = document.getElementById('steuerung');
   const knopf = document.getElementById('startKnopf');
   const resetKnopf = document.getElementById('resetKnopf');
   const vollbildKnopf = document.getElementById('vollbildKnopf');
@@ -183,10 +184,29 @@
     return min * 60 + sek;
   }
 
+  function passeGroesseAn() {
+    anzeige.style.fontSize = '100px';
+    const rect = anzeige.getBoundingClientRect();
+    let verfuegbarHoehe = window.innerHeight;
+    if (!document.body.classList.contains('versteckt')) {
+      const luecke = parseFloat(getComputedStyle(document.body).gap) || 0;
+      verfuegbarHoehe -= steuerung.offsetHeight + luecke;
+    }
+    const faktor = Math.min(window.innerWidth / rect.width, verfuegbarHoehe / rect.height);
+    anzeige.style.fontSize = Math.floor(100 * faktor) + 'px';
+  }
+
   function zeige(sekunden) {
-    anzeige.textContent = pad(Math.floor(sekunden / 60)) + ':' + pad(sekunden % 60);
+    const text = pad(Math.floor(sekunden / 60)) + ':' + pad(sekunden % 60);
+    if (text !== anzeige.textContent) {
+      anzeige.textContent = text;
+      passeGroesseAn();
+    }
     document.body.classList.toggle('abgelaufen', sekunden >= grenzeSekunden());
   }
+
+  window.addEventListener('resize', passeGroesseAn);
+  passeGroesseAn();
 
   function aktualisieren() {
     if (!laufend) return;
@@ -216,10 +236,12 @@
 
   ausblendKnopf.addEventListener('click', () => {
     document.body.classList.add('versteckt');
+    passeGroesseAn();
   });
 
   anzeige.addEventListener('click', () => {
     document.body.classList.remove('versteckt');
+    passeGroesseAn();
   });
 
   function grenzeGeaendert() {
