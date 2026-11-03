@@ -1,4 +1,5 @@
-const CACHE = 'trainingwatch-v8';
+const VERSION = 'v9';
+const CACHE = 'trainingwatch-' + VERSION;
 const DATEIEN = [
   './trainingwatch.html',
   './manifest.webmanifest',
@@ -22,8 +23,40 @@ self.addEventListener('activate', (event) => {
   self.clients.claim();
 });
 
+self.addEventListener('message', (event) => {
+  if (event.data === 'VERSION') {
+    event.source.postMessage({ typ: 'VERSION', version: VERSION });
+  }
+});
+
 self.addEventListener('fetch', (event) => {
+  if (event.request.mode === 'navigate') {
+    event.respondWith(
+      fetch(event.request)
+        .then((antwort) => {
+          if (antwort.ok) {
+            const kopie = antwort.clone();
+            caches.open(CACHE).then((cache) => cache.put(event.request, kopie));
+          }
+          return antwort;
+        })
+        .catch(() => caches.match(event.request))
+    );
+    return;
+  }
+
   event.respondWith(
-    caches.match(event.request).then((treffer) => treffer || fetch(event.request))
+    caches.match(event.request).then((treffer) => {
+      if (treffer) {
+        return treffer;
+      }
+      return fetch(event.request).then((antwort) => {
+        if (antwort.ok) {
+          const kopie = antwort.clone();
+          caches.open(CACHE).then((cache) => cache.put(event.request, kopie));
+        }
+        return antwort;
+      });
+    })
   );
 });
