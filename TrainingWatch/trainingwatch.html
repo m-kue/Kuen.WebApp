@@ -203,8 +203,41 @@
     }
   });
 
+  let wakeLock = null;
+
+  async function bildschirmWachHalten() {
+    if (!('wakeLock' in navigator) || document.visibilityState !== 'visible' || wakeLock) {
+      return;
+    }
+    try {
+      wakeLock = await navigator.wakeLock.request('screen');
+      wakeLock.addEventListener('release', () => {
+        wakeLock = null;
+      });
+    } catch (err) {
+      wakeLock = null;
+    }
+  }
+
+  function wakeLockFreigeben() {
+    if (wakeLock) {
+      wakeLock.release().catch(() => {});
+    }
+  }
+
   document.addEventListener('fullscreenchange', () => {
     vollbildKnopf.textContent = document.fullscreenElement ? 'Vollbild beenden' : 'Vollbild';
+    if (document.fullscreenElement) {
+      bildschirmWachHalten();
+    } else {
+      wakeLockFreigeben();
+    }
+  });
+
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible' && document.fullscreenElement) {
+      bildschirmWachHalten();
+    }
   });
 
   if ('serviceWorker' in navigator) {
