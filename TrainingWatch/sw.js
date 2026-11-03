@@ -1,4 +1,4 @@
-const CACHE = 'trainingwatch-v4';
+const CACHE = 'trainingwatch-v5';
 const DATEIEN = [
   './trainingwatch.html',
   './manifest.webmanifest',
