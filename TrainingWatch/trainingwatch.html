@@ -203,10 +203,6 @@
     }
   });
 
-  document.addEventListener('fullscreenchange', () => {
-    vollbildKnopf.textContent = document.fullscreenElement ? 'Vollbild beenden' : 'Vollbild';
-  });
-
   let wakeLock = null;
 
   async function bildschirmWachHalten() {
@@ -223,15 +219,26 @@
     }
   }
 
-  document.addEventListener('visibilitychange', () => {
-    if (document.visibilityState === 'visible') {
+  function wakeLockFreigeben() {
+    if (wakeLock) {
+      wakeLock.release().catch(() => {});
+    }
+  }
+
+  document.addEventListener('fullscreenchange', () => {
+    vollbildKnopf.textContent = document.fullscreenElement ? 'Vollbild beenden' : 'Vollbild';
+    if (document.fullscreenElement) {
       bildschirmWachHalten();
+    } else {
+      wakeLockFreigeben();
     }
   });
 
-  document.addEventListener('pointerdown', bildschirmWachHalten);
-
-  bildschirmWachHalten();
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible' && document.fullscreenElement) {
+      bildschirmWachHalten();
+    }
+  });
 
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('sw.js');
