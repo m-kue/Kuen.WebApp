@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#1a1a2e">
+<title>Kuen.WebApp</title>
+<style>
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  body {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 24px;
+    font-family: 'Segoe UI', Arial, sans-serif;
+    background: #1a1a2e;
+    color: #ffffff;
+  }
+
+  h1 {
+    font-size: min(12vw, 8vh);
+    font-weight: 700;
+  }
+
+  a {
+    font-size: 1.2rem;
+    font-weight: 600;
+    padding: 12px 36px;
+    border-radius: 999px;
+    background: #16a085;
+    color: #ffffff;
+    text-decoration: none;
+  }
+
+  a:hover {
+    background: #1abc9c;
+  }
+
+  a.time-timer {
+    background: #c0392b;
+  }
+
+  a.time-timer:hover {
+    background: #e74c3c;
+  }
+
+  #branch-previews {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+  }
+
+  #branch-previews h2 {
+    font-size: 1.4rem;
+    font-weight: 600;
+  }
+
+  #branch-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+  }
+
+  #branch-list a {
+    font-size: 1rem;
+    padding: 8px 24px;
+    background: #2c3e50;
+  }
+
+  #branch-list a:hover {
+    background: #34495e;
+  }
+</style>
+</head>
+<body>
+  <h1>Kuen.WebApp</h1>
+  <a href="TrainingWatch/trainingwatch.html">TrainingWatch &ndash; Stoppuhr</a>
+  <a class="time-timer" href="TimeTimer/timetimer.html">TimeTimer &ndash; visueller Countdown</a>
+  <section id="branch-previews">
+    <h2>Branch-Previews</h2>
+    <ul id="branch-list"></ul>
+  </section>
+  <script>
+    (function () {
+      var REPO = 'm-kue/Kuen.WebApp';
+      var seg = location.pathname.split('/').filter(Boolean);
+      var base = '/' + (seg[0] || '') + '/';
+      function safe(name) {
+        return name.replace(/\//g, '--');
+      }
+      fetch('https://api.github.com/repos/' + REPO + '/branches?per_page=100')
+        .then(function (r) { return r.json(); })
+        .then(function (branches) {
+          branches.sort(function (a, b) {
+            if (a.name === 'main') return -1;
+            if (b.name === 'main') return 1;
+            return a.name.localeCompare(b.name);
+          });
+          var ul = document.getElementById('branch-list');
+          branches.forEach(function (b) {
+            var li = document.createElement('li');
+            var a = document.createElement('a');
+            a.href = base + 'preview/' + safe(b.name) + '/';
+            a.textContent = b.name;
+            li.appendChild(a);
+            ul.appendChild(li);
+          });
+        })
+        .catch(function () {
+          document.getElementById('branch-previews').style.display = 'none';
+        });
+    })();
+  </script>
+</body>
+</html>
