@@ -1,9 +1,13 @@
-const CACHE = 'timetimer-v1';
+const VERSION = 'v1';
+const CACHE = 'timetimer-' + VERSION;
+importScripts('../shared/sw-version.js');
+
 const DATEIEN = [
   './timetimer.html',
   './manifest.webmanifest',
   './icon-192.png',
-  './icon-512.png'
+  './icon-512.png',
+  '../shared/version.js'
 ];
 
 self.addEventListener('install', (event) => {
