@@ -1,0 +1,69 @@
+name: Pages Branch-Preview
+on:
+  push:
+    branches: ['**', '!gh-pages']
+  delete:
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: 'Branch für Preview (leer = aktuell ausgecheckter Branch)'
+        required: false
+        default: ''
+permissions:
+  contents: write
+concurrency:
+  group: gh-pages-deploy
+  cancel-in-progress: false
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: content
+      - name: Branch-Namen ermitteln
+        id: meta
+        run: |
+          case "${{ github.event_name }}" in
+            delete) BRANCH="${{ github.event.ref }}" ;;
+            *)      BRANCH="${{ inputs.branch || github.ref_name }}" ;;
+          esac
+          SAFE=$(printf '%s' "$BRANCH" | sed 's|/|--|g')
+          printf 'branch=%s\nsafe=%s\n' "$BRANCH" "$SAFE" >> "$GITHUB_OUTPUT"
+      - name: gh-pages vorbereiten
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          REPO_URL="https://x-access-token:${GH_TOKEN}@github.com/${{ github.repository }}.git"
+          if git ls-remote --exit-code --heads "$REPO_URL" gh-pages >/dev/null 2>&1; then
+            git clone --quiet --depth 1 --branch gh-pages "$REPO_URL" site
+          else
+            mkdir site
+            git -C site init --quiet -b gh-pages
+            git -C site remote add origin "$REPO_URL"
+          fi
+          git -C site config user.name "github-actions[bot]"
+          git -C site config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+      - name: Preview aktualisieren
+        run: |
+          SAFE="${{ steps.meta.outputs.safe }}"
+          DEST="site/preview/$SAFE"
+          if [ "${{ github.event_name }}" = "delete" ]; then
+            rm -rf "$DEST"
+          else
+            mkdir -p "$DEST"
+            tar -C content --exclude=.git --exclude=.github -cf - . | tar -C "$DEST" -xf -
+            if [ "${{ steps.meta.outputs.branch }}" = "main" ] || [ ! -f site/index.html ]; then
+              cp content/index.html site/index.html
+            fi
+          fi
+      - name: gh-pages committen und pushen
+        run: |
+          cd site
+          git add -A
+          if git diff --cached --quiet; then
+            echo "Keine Änderungen – nichts zu pushen."
+          else
+            git commit --quiet -m "preview: ${{ steps.meta.outputs.branch }} (${{ github.event_name }} ${{ github.sha }})"
+            git push --quiet origin gh-pages
+          fi
