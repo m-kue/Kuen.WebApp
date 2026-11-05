@@ -1,10 +1,13 @@
 const VERSION = 'v9';
 const CACHE = 'trainingwatch-' + VERSION;
+importScripts('../shared/sw-version.js');
+
 const DATEIEN = [
   './trainingwatch.html',
   './manifest.webmanifest',
   './icon-192.png',
-  './icon-512.png'
+  './icon-512.png',
+  '../shared/version.js'
 ];
 
 self.addEventListener('install', (event) => {
@@ -21,12 +24,6 @@ self.addEventListener('activate', (event) => {
     )
   );
   self.clients.claim();
-});
-
-self.addEventListener('message', (event) => {
-  if (event.data === 'VERSION') {
-    event.source.postMessage({ typ: 'VERSION', version: VERSION });
-  }
 });
 
 self.addEventListener('fetch', (event) => {

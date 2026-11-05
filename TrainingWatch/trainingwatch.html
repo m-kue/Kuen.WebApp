@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#1a1a2e">
 <link rel="manifest" href="manifest.webmanifest">
+<script src="../shared/version.js" defer></script>
 <title>TrainingWatch</title>
 <style>
   * {
@@ -120,15 +121,6 @@
   .grenze input:focus {
     outline: 2px solid #16a085;
   }
-
-  #version {
-    position: fixed;
-    right: 12px;
-    bottom: 8px;
-    font-size: 0.75rem;
-    color: rgba(255, 255, 255, 0.45);
-    user-select: none;
-  }
 </style>
 </head>
 <body>
@@ -145,8 +137,6 @@
     </label>
   </div>
 
-  <div id="version"></div>
-
 <script>
   const anzeige = document.getElementById('anzeige');
   const steuerung = document.getElementById('steuerung');
@@ -155,7 +145,6 @@
   const vollbildKnopf = document.getElementById('vollbildKnopf');
   const grenzeMin = document.getElementById('grenzeMin');
   const grenzeSek = document.getElementById('grenzeSek');
-  const versionAnzeige = document.getElementById('version');
 
   let laufend = false;
   let basisSekunden = 0;
@@ -271,32 +260,9 @@
   });
 
   if ('serviceWorker' in navigator) {
-    const hatteController = !!navigator.serviceWorker.controller;
-
-    navigator.serviceWorker.addEventListener('controllerchange', () => {
-      if (hatteController) {
-        window.location.reload();
-      }
-    });
-
-    navigator.serviceWorker.addEventListener('message', (event) => {
-      if (event.data && event.data.typ === 'VERSION') {
-        versionAnzeige.textContent = 'v' + event.data.version;
-      }
-    });
-
-    function versionAnzeigen() {
-      if (navigator.serviceWorker.controller) {
-        navigator.serviceWorker.controller.postMessage('VERSION');
-      }
-    }
-
-    versionAnzeigen();
-
     navigator.serviceWorker.register('sw.js').then((registrierung) => {
       registrierung.update();
     });
-    navigator.serviceWorker.ready.then(versionAnzeigen);
   }
 </script>
 </body>
