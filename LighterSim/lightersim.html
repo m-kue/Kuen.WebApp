@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#1a1a2e">
+<link rel="manifest" href="manifest.webmanifest">
+<title>LighterSim</title>
+<style>
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  html, body {
+    height: 100%;
+    overflow: hidden;
+  }
+
+  body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2.5vh;
+    font-family: 'Segoe UI', Arial, sans-serif;
+    background: #1a1a2e;
+    color: #ffffff;
+  }
+
+  #ambiente {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    background: radial-gradient(90% 70% at 50% 30%, rgba(255, 152, 0, 0.22), rgba(255, 152, 0, 0) 70%);
+    opacity: 0;
+    transition: opacity 0.8s ease;
+  }
+
+  body.an #ambiente {
+    opacity: 1;
+  }
+
+  #szene {
+    height: min(74vh, 92vw);
+    cursor: pointer;
+    touch-action: manipulation;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  #rauch {
+    opacity: 0;
+    transform-box: fill-box;
+    transform-origin: 50% 100%;
+  }
+
+  #rauch.aktiv {
+    animation: rauchAuf 1.4s ease-out forwards;
+  }
+
+  @keyframes rauchAuf {
+    0% { opacity: 0.75; transform: translateY(0) scale(0.7); }
+    30% { opacity: 0.6; }
+    100% { opacity: 0; transform: translateY(-52px) scale(1.4); }
+  }
+
+  #steuerung {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  #steuerung button {
+    font-size: 0.95rem;
+    font-weight: 600;
+    padding: 8px 20px;
+    border: 2px solid rgba(255, 255, 255, 0.5);
+    border-radius: 999px;
+    background: transparent;
+    color: #ffffff;
+    cursor: pointer;
+  }
+
+  #steuerung button:hover {
+    background: rgba(255, 255, 255, 0.15);
+  }
+
+  #hinweis {
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.65);
+    user-select: none;
+    text-align: center;
+    padding: 0 16px;
+  }
+</style>
+</head>
+<body>
+<div id="ambiente"></div>
+<svg id="szene" viewBox="0 0 200 340" role="img" aria-label="Feuerzeug – tippen zum An- und Ausmachen">
+  <defs>
+    <linearGradient id="gehaeuse" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#eceff1"/>
+      <stop offset="0.5" stop-color="#b0bec5"/>
+      <stop offset="1" stop-color="#78909c"/>
+    </linearGradient>
+    <radialGradient id="glanzFarb" cx="0.5" cy="0.5" r="0.5">
+      <stop id="glanzA" offset="0" stop-color="#ff9800" stop-opacity="0.55"/>
+      <stop id="glanzB" offset="1" stop-color="#ff9800" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="weich" x="-60%" y="-60%" width="220%" height="220%">
+      <feGaussianBlur stdDeviation="3"/>
+    </filter>
+  </defs>
+
+  <circle id="glanz" cx="100" cy="100" r="66" fill="url(#glanzFarb)" opacity="0"></circle>
+
+  <g id="flamme" opacity="0">
+    <path id="fAussen" d="M100 132 C 80 114 84 88 100 48 C 116 88 120 114 100 132 Z" fill="#e64a19" filter="url(#weich)"></path>
+    <path id="fMitte" d="M100 132 C 88 118 91 96 100 66 C 109 96 112 118 100 132 Z" fill="#ffb300"></path>
+    <path id="fKern" d="M100 132 C 94 122 96 106 100 88 C 104 106 106 122 100 132 Z" fill="#fffde7"></path>
+  </g>
+
+  <circle id="funke" cx="100" cy="126" r="5" fill="#fff59d" opacity="0"></circle>
+
+  <g id="rauch">
+    <ellipse cx="100" cy="118" rx="6" ry="10" fill="rgba(210, 210, 210, 0.55)"></ellipse>
+    <ellipse cx="105" cy="102" rx="9" ry="13" fill="rgba(190, 190, 190, 0.35)"></ellipse>
+  </g>
+
+  <g id="feuerzeug">
+    <rect x="68" y="150" width="64" height="178" rx="12" fill="url(#gehaeuse)"></rect>
+    <rect x="74" y="158" width="6" height="162" rx="3" fill="rgba(255, 255, 255, 0.35)"></rect>
+    <rect x="68" y="236" width="64" height="24" fill="rgba(0, 0, 0, 0.18)"></rect>
+    <path d="M68 150 L68 140 Q68 132 76 132 L124 132 Q132 132 132 140 L132 150 Z" fill="url(#gehaeuse)"></path>
+    <rect x="91" y="128" width="18" height="7" rx="3.5" fill="#263238"></rect>
+    <rect x="117" y="118" width="18" height="7" rx="3.5" fill="#90a4ae" transform="rotate(-18 117 121)"></rect>
+    <circle cx="100" cy="122" r="10" fill="#546e7a" stroke="#263238" stroke-width="2"></circle>
+    <path d="M100 113 V131 M91 122 H109 M94 116 L106 128 M106 116 L94 128" stroke="#263238" stroke-width="2"></path>
+  </g>
+</svg>
+
+<div id="steuerung">
+  <button id="vollbildKnopf">Vollbild</button>
+  <button id="windKnopf">Windstoß</button>
+  <button id="farbeKnopf">Farbe</button>
+</div>
+<div id="hinweis">Tippen: an / aus &middot; Schütteln: Wind &middot; Vollbild h&auml;lt den Bildschirm wach</div>
+
+<script>
+  const szene = document.getElementById('szene');
+  const flamme = document.getElementById('flamme');
+  const glanz = document.getElementById('glanz');
+  const funke = document.getElementById('funke');
+  const rauch = document.getElementById('rauch');
+  const fAussen = document.getElementById('fAussen');
+  const fMitte = document.getElementById('fMitte');
+  const fKern = document.getElementById('fKern');
+  const glanzA = document.getElementById('glanzA');
+  const glanzB = document.getElementById('glanzB');
+  const vollbildKnopf = document.getElementById('vollbildKnopf');
+  const windKnopf = document.getElementById('windKnopf');
+  const farbeKnopf = document.getElementById('farbeKnopf');
+
+  const FARBEN = [
+    { aussen: '#e64a19', mitte: '#ffb300', kern: '#fffde7', glanz: '#ff9800' },
+    { aussen: '#1565c0', mitte: '#42a5f5', kern: '#e3f2fd', glanz: '#42a5f5' },
+    { aussen: '#2e7d32', mitte: '#66bb6a', kern: '#e8f5e9', glanz: '#66bb6a' },
+    { aussen: '#6a1b9a', mitte: '#ab47bc', kern: '#f3e5f5', glanz: '#ab47bc' }
+  ];
+
+  let farbIndex = 0;
+
+  function farbeAnwenden() {
+    const f = FARBEN[farbIndex];
+    fAussen.setAttribute('fill', f.aussen);
+    fMitte.setAttribute('fill', f.mitte);
+    fKern.setAttribute('fill', f.kern);
+    glanzA.setAttribute('stop-color', f.glanz);
+    glanzB.setAttribute('stop-color', f.glanz);
+  }
+
+  let an = false;
+  let zuendT = 0;
+  let ausT = 0;
+  let wind = 0;
+
+  let audioKontext = null;
+
+  function whoosh() {
+    try {
+      audioKontext = audioKontext || new (window.AudioContext || window.webkitAudioContext)();
+      const dauer = 0.18;
+      const puffer = audioKontext.createBuffer(1, audioKontext.sampleRate * dauer, audioKontext.sampleRate);
+      const daten = puffer.getChannelData(0);
+      for (let i = 0; i < daten.length; i++) {
+        daten[i] = (Math.random() * 2 - 1) * (1 - i / daten.length);
+      }
+      const quelle = audioKontext.createBufferSource();
+      quelle.buffer = puffer;
+      const filter = audioKontext.createBiquadFilter();
+      filter.type = 'bandpass';
+      filter.frequency.value = 900;
+      filter.Q.value = 0.8;
+      const gain = audioKontext.createGain();
+      gain.gain.value = 0.25;
+      quelle.connect(filter).connect(gain).connect(audioKontext.destination);
+      quelle.start();
+    } catch (err) {
+      audioKontext = null;
+    }
+  }
+
+  let wakeLock = null;
+
+  async function bildschirmWachHalten() {
+    if (!('wakeLock' in navigator) || document.visibilityState !== 'visible' || wakeLock) {
+      return;
+    }
+    try {
+      wakeLock = await navigator.wakeLock.request('screen');
+      wakeLock.addEventListener('release', () => {
+        wakeLock = null;
+      });
+    } catch (err) {
+      wakeLock = null;
+    }
+  }
+
+  function wakeLockFreigeben() {
+    if (wakeLock) {
+      wakeLock.release().catch(() => {});
+    }
+  }
+
+  function anzuenden() {
+    an = true;
+    ausT = 0;
+    zuendT = performance.now();
+    document.body.classList.add('an');
+    funke.setAttribute('opacity', '0.95');
+    if (navigator.vibrate) {
+      navigator.vibrate(40);
+    }
+    whoosh();
+    bildschirmWachHalten();
+  }
+
+  function ausblasen() {
+    if (!an) return;
+    an = false;
+    ausT = performance.now();
+    document.body.classList.remove('an');
+    rauch.classList.remove('aktiv');
+    void rauch.getBoundingClientRect();
+    rauch.classList.add('aktiv');
+    if (!document.fullscreenElement) {
+      wakeLockFreigeben();
+    }
+  }
+
+  function umschalten() {
+    if (an) {
+      ausblasen();
+    } else {
+      anzuenden();
+    }
+  }
+
+  szene.addEventListener('click', umschalten);
+  szene.addEventListener('contextmenu', (e) => e.preventDefault());
+  document.addEventListener('keydown', (e) => {
+    if (e.code === 'Space' || e.code === 'Enter') {
+      e.preventDefault();
+      umschalten();
+    }
+  });
+
+  windKnopf.addEventListener('click', () => {
+    const richtung = Math.random() < 0.5 ? -1 : 1;
+    wind += richtung * (0.8 + Math.random() * 0.7);
+    if (Math.abs(wind) > 1.4) {
+      ausblasen();
+    }
+  });
+
+  let letzteBeschleunigung = null;
+
+  window.addEventListener('devicemotion', (e) => {
+    const a = e.accelerationIncludingGravity;
+    if (!a || a.x === null || a.y === null || a.z === null) return;
+    if (letzteBeschleunigung) {
+      const dx = a.x - letzteBeschleunigung.x;
+      const dy = a.y - letzteBeschleunigung.y;
+      const dz = a.z - letzteBeschleunigung.z;
+      const betrag = Math.sqrt(dx * dx + dy * dy + dz * dz);
+      if (betrag > 5.5) {
+        wind += (dx >= 0 ? 1 : -1) * Math.min(1.5, betrag / 9);
+        if (Math.abs(wind) > 1.4) {
+          ausblasen();
+        }
+      }
+    }
+    letzteBeschleunigung = { x: a.x, y: a.y, z: a.z };
+  });
+
+  farbeKnopf.addEventListener('click', () => {
+    farbIndex = (farbIndex + 1) % FARBEN.length;
+    farbeAnwenden();
+  });
+
+  vollbildKnopf.addEventListener('click', () => {
+    if (document.fullscreenElement) {
+      document.exitFullscreen();
+    } else {
+      document.documentElement.requestFullscreen();
+    }
+  });
+
+  document.addEventListener('fullscreenchange', () => {
+    vollbildKnopf.textContent = document.fullscreenElement ? 'Vollbild beenden' : 'Vollbild';
+    if (document.fullscreenElement) {
+      bildschirmWachHalten();
+    } else {
+      wakeLockFreigeben();
+    }
+  });
+
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible' && (an || document.fullscreenElement)) {
+      bildschirmWachHalten();
+    }
+  });
+
+  function zufall() {
+    return Math.random() - 0.5;
+  }
+
+  function rahmen(jetzt) {
+    wind *= 0.982;
+    if (an) {
+      const auf = Math.min(1, (jetzt - zuendT) / 200);
+      const ease = 1 - Math.pow(1 - auf, 3);
+      const k = wind * 16 + zufall() * 5;
+      const sy = (0.25 + 0.75 * ease) * (1 + zufall() * 0.14 - Math.abs(wind) * 0.18);
+      const sx = 1 + zufall() * 0.1 + Math.abs(wind) * 0.08;
+      const tx = wind * 12 + zufall() * 2;
+      flamme.setAttribute('transform',
+        'translate(' + (100 + tx) + ' 132) skewX(' + k + ') scale(' + sx + ' ' + sy + ') translate(-100 -132)');
+      flamme.setAttribute('opacity', String(0.35 + 0.65 * ease));
+      glanz.setAttribute('opacity', String(0.5 + zufall() * 0.2));
+      glanz.setAttribute('r', String(62 + zufall() * 10));
+      const fp = (jetzt - zuendT) / 350;
+      funke.setAttribute('opacity', fp >= 1 ? '0' : String(0.95 * (1 - fp)));
+    } else if (ausT) {
+      const p = Math.min(1, (jetzt - ausT) / 260);
+      flamme.setAttribute('transform',
+        'translate(100 132) skewX(' + (wind * 20) + ') scale(' + (1 - p * 0.9) + ' ' + (1 - p) + ') translate(-100 -132)');
+      flamme.setAttribute('opacity', String(1 - p));
+      glanz.setAttribute('opacity', String(0.5 * (1 - p)));
+      if (p >= 1) {
+        ausT = 0;
+        flamme.setAttribute('opacity', '0');
+        glanz.setAttribute('opacity', '0');
+      }
+    } else {
+      glanz.setAttribute('opacity', '0');
+    }
+    requestAnimationFrame(rahmen);
+  }
+
+  farbeAnwenden();
+  requestAnimationFrame(rahmen);
+
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('sw.js');
+  }
+</script>
+</body>
+</html>
